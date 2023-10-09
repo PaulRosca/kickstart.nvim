@@ -393,8 +393,6 @@ vim.api.nvim_set_keymap(
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
 
--- Projects
-vim.keymap.set('n', '<leader>p', require('telescope').extensions.projects.projects, { desc = 'Search [P]rojects'})
 
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
@@ -416,11 +414,30 @@ vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc
 
 -- Find keymaps
 vim.keymap.set('n', '<leader>.', require('telescope.builtin').find_files, { desc = 'Find Files' })
+vim.keymap.set('n', '<leader>fP', ':e ~/.config/nvim/init.lua<cr>', { desc = 'Open [Private] Config' })
 vim.keymap.set('n', '<leader>ff', require('telescope.builtin').find_files, { desc = '[F]ind [F]iles' })
+vim.keymap.set('n', '<leader>fp', require('telescope').extensions.projects.projects, { desc = '[F]ind [P]rojects'})
 vim.keymap.set('n', '<leader>fh', require('telescope.builtin').help_tags, { desc = '[F]ind [H]elp' })
 vim.keymap.set('n', '<leader>fw', require('telescope.builtin').live_grep, { desc = '[F]ind [W]ord' })
 vim.keymap.set('n', '<leader>fd', require('telescope.builtin').diagnostics, { desc = '[F]ind [D]iagnostics' })
 vim.keymap.set('n', '<leader>fr', require('telescope.builtin').oldfiles, { desc = '[F]ind [R]ecent' })
+
+-- Tab keymaps
+vim.keymap.set('n', '<leader><tab>n', ':tabnew<cr>', { desc = '[T]ab [N]ew' })
+vim.keymap.set('n', '<leader><tab>d', ':tabclose<cr>', { desc = '[T]ab [D]elete' })
+vim.keymap.set('n', '<leader><tab>1', '1gt')
+vim.keymap.set('n', '<leader><tab>2', '2gt')
+vim.keymap.set('n', '<leader><tab>3', '3gt')
+vim.keymap.set('n', '<leader><tab>4', '4gt')
+vim.keymap.set('n', '<leader><tab>5', '5gt')
+vim.keymap.set('n', '<leader><tab>6', '6gt')
+vim.keymap.set('n', '<leader><tab>7', '7gt')
+vim.keymap.set('n', '<leader><tab>8', '8gt')
+vim.keymap.set('n', '<leader><tab>9', '9gt')
+vim.keymap.set('n', '<leader><tab>0', ':tablast<cr>')
+
+-- Buffer keymaps
+vim.keymap.set('n', '<leader>bd', ':b# | bd#<cr>', { desc = '[B]uffer [D]elete' })
 
 vim.keymap.set('n', '<leader>ht', require('telescope.builtin').colorscheme, { desc = 'Change colorscheme' })
 -- [[ Configure Treesitter ]]
@@ -429,7 +446,7 @@ vim.keymap.set('n', '<leader>ht', require('telescope.builtin').colorscheme, { de
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim' },
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'html', 'css', 'scss', 'vue' },
   
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -565,6 +582,7 @@ end
 -- document existing key chains
 require('which-key').register({
   ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
+  ['<leader>b'] = { name = '[B]uffer', _ = 'which_key_ignore' },
   ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
   ['<leader>o'] = { name = '[O]pen', _ = 'which_key_ignore' },
   ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
@@ -603,6 +621,7 @@ require('which-key').register({
 local servers = {
   clangd = {},
   gopls = {},
+  vuels = {},
   -- pyright = {},
   -- rust_analyzer = {},
   tsserver = {},
@@ -745,10 +764,22 @@ db.setup({
         key = "SPC f b",
       },
       {
+        icon = "🚀  ",
+        desc = "Find project                              ",
+        action = "Telescope projects",
+        key = "SPC f p",
+      },
+      {
         icon = "  ",
         desc = "Find word                               ",
         action = "Telescope live_grep",
         key = "SPC f w",
+      },
+      {
+        icon = "⚙  ",
+        desc = "Open private config",
+        action = "e ~/.config/nvim/init.lua<cr>         ",
+        key = "SPC f P",
       },
       {
         icon = "  ",
