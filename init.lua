@@ -94,6 +94,17 @@ require('lazy').setup({
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
+
+      {
+          'nvimdev/lspsaga.nvim',
+          config = function()
+              require('lspsaga').setup({})
+          end,
+          dependencies = {
+              'nvim-treesitter/nvim-treesitter',
+              'nvim-tree/nvim-web-devicons'
+          }
+      }
     },
   },
 
@@ -173,13 +184,20 @@ require('lazy').setup({
     },
   },
 
+  -- Themes
   {
-    -- Theme inspired by Atom
-    'navarasu/onedark.nvim',
+    "folke/tokyonight.nvim",
+    lazy = false,
     priority = 1000,
-    config = function()
-      vim.cmd.colorscheme 'onedark'
+    opts = {},
+  },
+  {
+    "ellisonleao/gruvbox.nvim",
+    priority = 1000,
+    config = function ()
+      vim.cmd.colorscheme 'gruvbox'
     end,
+    opts = ...
   },
 
   {
@@ -188,11 +206,43 @@ require('lazy').setup({
     -- See `:help lualine.txt`
     opts = {
       options = {
-        icons_enabled = false,
-        theme = 'onedark',
-        component_separators = '|',
-        section_separators = '',
+        icons_enabled = true,
+        theme = 'auto',
+        component_separators = { left = '', right = ''},
+        section_separators = { left = '', right = ''},
+        disabled_filetypes = {
+          statusline = {},
+          winbar = {},
+        },
+        ignore_focus = {},
+        always_divide_middle = true,
+        globalstatus = false,
+        refresh = {
+          statusline = 1000,
+          tabline = 1000,
+          winbar = 1000,
+        }
       },
+      sections = {
+        lualine_a = {'mode'},
+        lualine_b = {'branch', 'diff', 'diagnostics'},
+        lualine_c = {'filename'},
+        lualine_x = {'encoding', 'fileformat', 'filetype'},
+        lualine_y = {'progress'},
+        lualine_z = {'location'}
+      },
+      inactive_sections = {
+        lualine_a = {},
+        lualine_b = {},
+        lualine_c = {'filename'},
+        lualine_x = {'location'},
+        lualine_y = {},
+        lualine_z = {}
+      },
+      tabline = {},
+      winbar = {},
+      inactive_winbar = {},
+      extensions = {}
     },
   },
 
@@ -337,6 +387,9 @@ vim.o.completeopt = 'menuone,noselect'
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 
+vim.o.splitbelow = true
+vim.o.splitright = true
+vim.o.title = true
 -- [[ Basic Keymaps ]]
 
 -- Keymaps for better default experience
@@ -405,8 +458,12 @@ vim.keymap.set('n', '<leader>/', function()
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
+-- Terminal esc keymap
+vim.keymap.set('t', '<esc>', [[<C-\><C-n>]])
+
 -- Open keymaps
 vim.keymap.set('n', '<leader>ot', ':NvimTreeToggle<cr>', { desc = '[O]pen [T]ree' })
+vim.keymap.set('n', '<leader>oe', ':Lspsaga term_toggle<cr>', { desc = '[O]pen Terminal [E]mulator' })
 
 -- Git keymaps
 vim.keymap.set('n', '<leader>gs', ':G<cr>', { desc = '[G]it [S]tatus' });
@@ -439,6 +496,12 @@ vim.keymap.set('n', '<leader><tab>0', ':tablast<cr>')
 -- Buffer keymaps
 vim.keymap.set('n', '<leader>bd', ':b# | bd#<cr>', { desc = '[B]uffer [D]elete' })
 
+-- Diagnostic keymaps
+vim.keymap.set('n', '<leader>do', '<cmd>lua vim.diagnostic.open_float()<CR>', { desc = 'Diagnostic [O]pen' })
+vim.keymap.set('n', '<leader>dN', '<cmd>lua vim.diagnostic.goto_prev()<CR>', { desc = 'Diagnostic Previous' })
+vim.keymap.set('n', '<leader>dn', '<cmd>lua vim.diagnostic.goto_next()<CR>', { desc = 'Diagnostic Next' })
+vim.keymap.set('n', '<leader>dd', '<cmd>Telescope diagnostics<CR>', { desc = 'List [D]iagnostics' })
+
 vim.keymap.set('n', '<leader>ht', require('telescope.builtin').colorscheme, { desc = 'Change colorscheme' })
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
@@ -446,11 +509,9 @@ vim.keymap.set('n', '<leader>ht', require('telescope.builtin').colorscheme, { de
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'html', 'css', 'scss', 'vue' },
-  
+    ensure_installed = { 'c', 'cpp', 'go', 'gomod', 'gosum', 'gowork', 'sql', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'html', 'css', 'scss', 'vue', 'markdown', 'markdown_inline' },
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
-  
     highlight = { enable = true },
     indent = { enable = true },
     incremental_selection = {
@@ -535,18 +596,26 @@ local on_attach = function(client, bufnr)
     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
   end
 
-  nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-  nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+  nmap('<leader>rn', ':Lspsaga rename<cr>', '[R]e[n]ame')
+  -- nmap('<leader>rp', ':Lspsaga lsp_rename ++project<cr>', '[R]ename [P]roject wide')
+  nmap('<leader>ca', ':Lspsaga code_action<cr>', '[C]ode [A]ction')
 
-  nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
+
+  nmap('<leader>ic', ':Lspsaga incoming_calls<cr>', '[I]ncoming [C]alls')
+  nmap('<leader>oc', ':Lspsaga outgoing_calls<cr>', '[O]utgoing [C]alls')
+
+  nmap('<leader>pd', ':Lspsaga peek_definition<cr>', '[P]eek [D]efinition')
+  nmap('<leader>pt', ':Lspsaga peek_type_definition<cr>', '[P]eek [T]ype Definition')
+
+  nmap('gd', ':Lspsaga goto_definition<cr>', '[G]oto [D]efinition')
   nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
   nmap('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
   nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
-  nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+  -- nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
   -- nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
 
   -- See `:help K` for why this keymap
-  nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
+  nmap('K', ':Lspsaga hover_doc<cr>', 'Hover Documentation')
   nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
 
   -- Lesser used LSP functionality
@@ -583,7 +652,7 @@ end
 require('which-key').register({
   ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
   ['<leader>b'] = { name = '[B]uffer', _ = 'which_key_ignore' },
-  ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+  ['<leader>d'] = { name = '[D]iagnostics', _ = 'which_key_ignore' },
   ['<leader>o'] = { name = '[O]pen', _ = 'which_key_ignore' },
   ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
   ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
@@ -622,6 +691,8 @@ local servers = {
   clangd = {},
   gopls = {},
   vuels = {},
+  eslint = {},
+  sqlls = {},
   -- pyright = {},
   -- rust_analyzer = {},
   tsserver = {},

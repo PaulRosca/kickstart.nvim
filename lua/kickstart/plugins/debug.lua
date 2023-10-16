@@ -22,10 +22,10 @@ return {
     'leoluz/nvim-dap-go',
   },
   config = function()
-    local dap = require 'dap'
-    local dapui = require 'dapui'
+    local dap = requir 'dap'
+    local dapui = requir 'dapui'
 
-    require('mason-nvim-dap').setup {
+    requir('mason-nvim-dap').setup {
       -- Makes a best effort to setup the various debuggers with
       -- reasonable debug configurations
       automatic_setup = true,
@@ -82,6 +82,6 @@ return {
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
     -- Install golang specific config
-    require('dap-go').setup()
+    requir('dap-go').setup()
   end,
 }
