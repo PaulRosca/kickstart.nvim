@@ -356,6 +356,8 @@ require('lazy').setup({
 -- Make line numbers default
 vim.wo.number = true
 
+vim.o.expandtab = true
+vim.o.smartindent = true
 -- Enable mouse mode
 vim.o.mouse = 'a'
 
@@ -597,7 +599,7 @@ local on_attach = function(client, bufnr)
   end
 
   nmap('<leader>rn', ':Lspsaga rename<cr>', '[R]e[n]ame')
-  -- nmap('<leader>rp', ':Lspsaga lsp_rename ++project<cr>', '[R]ename [P]roject wide')
+  nmap('<leader>rp', ':Lspsaga project_replace<cr>', '[R]eplace [P]roject wide')
   nmap('<leader>ca', ':Lspsaga code_action<cr>', '[C]ode [A]ction')
 
 
