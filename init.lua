@@ -477,7 +477,8 @@ vim.keymap.set('n', '<leader>fP', ':e ~/.config/nvim/init.lua<cr>', { desc = 'Op
 vim.keymap.set('n', '<leader>ff', require('telescope.builtin').find_files, { desc = '[F]ind [F]iles' })
 vim.keymap.set('n', '<leader>fp', require('telescope').extensions.projects.projects, { desc = '[F]ind [P]rojects'})
 vim.keymap.set('n', '<leader>fh', require('telescope.builtin').help_tags, { desc = '[F]ind [H]elp' })
-vim.keymap.set('n', '<leader>fw', require('telescope.builtin').live_grep, { desc = '[F]ind [W]ord' })
+
+vim.keymap.set('n', '<leader>fw', "<CMD>lua require('telescope.builtin').live_grep({debounce = 500})<CR>", { desc = '[F]ind [W]ord' })
 vim.keymap.set('n', '<leader>fd', require('telescope.builtin').diagnostics, { desc = '[F]ind [D]iagnostics' })
 vim.keymap.set('n', '<leader>fr', require('telescope.builtin').oldfiles, { desc = '[F]ind [R]ecent' })
 
@@ -695,6 +696,7 @@ local servers = {
   vuels = {},
   eslint = {},
   sqlls = {},
+  volar = {},
   -- pyright = {},
   -- rust_analyzer = {},
   tsserver = {},
