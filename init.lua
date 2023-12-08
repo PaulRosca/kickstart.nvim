@@ -78,6 +78,11 @@ require('lazy').setup({
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
 
+  -- Formatter package
+  {
+    'stevearc/conform.nvim',
+    opts = {},
+  },
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
   {
@@ -90,20 +95,20 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', tag = 'legacy', opts = {} },
+      { 'j-hui/fidget.nvim',       tag = 'legacy', opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
 
       {
-          'nvimdev/lspsaga.nvim',
-          config = function()
-              require('lspsaga').setup({})
-          end,
-          dependencies = {
-              'nvim-treesitter/nvim-treesitter',
-              'nvim-tree/nvim-web-devicons'
-          }
+        'nvimdev/lspsaga.nvim',
+        config = function()
+          require('lspsaga').setup({})
+        end,
+        dependencies = {
+          'nvim-treesitter/nvim-treesitter',
+          'nvim-tree/nvim-web-devicons'
+        }
       }
     },
   },
@@ -116,11 +121,11 @@ require('lazy').setup({
     opts = {},
     -- stylua: ignore
     keys = {
-      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
-      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
-      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
-      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
-      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+      { "s",     mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash" },
+      { "S",     mode = { "n", "x", "o" }, function() require("flash").treesitter() end,        desc = "Flash Treesitter" },
+      { "r",     mode = "o",               function() require("flash").remote() end,            desc = "Remote Flash" },
+      { "R",     mode = { "o", "x" },      function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+      { "<c-s>", mode = { "c" },           function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
     },
   },
 
@@ -148,11 +153,11 @@ require('lazy').setup({
   {
     'glepnir/dashboard-nvim',
     event = 'VimEnter',
-    dependencies = { {'nvim-tree/nvim-web-devicons'}}
+    dependencies = { { 'nvim-tree/nvim-web-devicons' } }
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  { 'folke/which-key.nvim',  opts = {} },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -170,16 +175,16 @@ require('lazy').setup({
 
         -- don't override the built-in and fugitive keymaps
         local gs = package.loaded.gitsigns
-        vim.keymap.set({'n', 'v'}, ']c', function()
+        vim.keymap.set({ 'n', 'v' }, ']c', function()
           if vim.wo.diff then return ']c' end
           vim.schedule(function() gs.next_hunk() end)
           return '<Ignore>'
-        end, {expr=true, buffer = bufnr, desc = "Jump to next hunk"})
-        vim.keymap.set({'n', 'v'}, '[c', function()
+        end, { expr = true, buffer = bufnr, desc = "Jump to next hunk" })
+        vim.keymap.set({ 'n', 'v' }, '[c', function()
           if vim.wo.diff then return '[c' end
           vim.schedule(function() gs.prev_hunk() end)
           return '<Ignore>'
-        end, {expr=true, buffer = bufnr, desc = "Jump to previous hunk"})
+        end, { expr = true, buffer = bufnr, desc = "Jump to previous hunk" })
       end,
     },
   },
@@ -206,7 +211,7 @@ require('lazy').setup({
     "catppuccin/nvim",
     name = "catppuccin",
     priority = 1000,
-    config = function ()
+    config = function()
       vim.cmd.colorscheme 'catppuccin'
     end,
   },
@@ -219,8 +224,8 @@ require('lazy').setup({
       options = {
         icons_enabled = true,
         theme = 'auto',
-        component_separators = { left = '', right = ''},
-        section_separators = { left = '', right = ''},
+        component_separators = { left = '', right = '' },
+        section_separators = { left = '', right = '' },
         disabled_filetypes = {
           statusline = {},
           winbar = {},
@@ -235,18 +240,18 @@ require('lazy').setup({
         }
       },
       sections = {
-        lualine_a = {'mode'},
-        lualine_b = {'branch', 'diff', 'diagnostics'},
-        lualine_c = {'filename'},
-        lualine_x = {'encoding', 'fileformat', 'filetype'},
-        lualine_y = {'progress'},
-        lualine_z = {'location'}
+        lualine_a = { 'mode' },
+        lualine_b = { 'branch', 'diff', 'diagnostics' },
+        lualine_c = { 'filename' },
+        lualine_x = { 'encoding', 'fileformat', 'filetype' },
+        lualine_y = { 'progress' },
+        lualine_z = { 'location' }
       },
       inactive_sections = {
         lualine_a = {},
         lualine_b = {},
-        lualine_c = {'filename'},
-        lualine_x = {'location'},
+        lualine_c = { 'filename' },
+        lualine_x = { 'location' },
         lualine_y = {},
         lualine_z = {}
       },
@@ -276,7 +281,7 @@ require('lazy').setup({
   -- Project management
   {
     'ahmedkhalf/project.nvim',
-    config = function ()
+    config = function()
       require("project_nvim").setup({
         show_hidden = true
       })
@@ -307,7 +312,7 @@ require('lazy').setup({
   {
     'glepnir/dashboard-nvim',
     event = 'VimEnter',
-    dependencies = { {'nvim-tree/nvim-web-devicons'}}
+    dependencies = { { 'nvim-tree/nvim-web-devicons' } }
   },
 
   -- Fuzzy Finder (files, lsp, etc)
@@ -342,8 +347,8 @@ require('lazy').setup({
 
   {
     -- Telescope file browser
-      "nvim-telescope/telescope-file-browser.nvim",
-      dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" }
+    "nvim-telescope/telescope-file-browser.nvim",
+    dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" }
   }
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -438,7 +443,7 @@ require('telescope').setup {
   },
   pickers = {
     find_files = {
-      hidden = true
+      hidden = false
     }
   }
 }
@@ -486,10 +491,11 @@ vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc
 vim.keymap.set('n', '<leader>.', require('telescope.builtin').find_files, { desc = 'Find Files' })
 vim.keymap.set('n', '<leader>fP', ':e ~/.config/nvim/init.lua<cr>', { desc = 'Open [Private] Config' })
 vim.keymap.set('n', '<leader>ff', require('telescope.builtin').find_files, { desc = '[F]ind [F]iles' })
-vim.keymap.set('n', '<leader>fp', require('telescope').extensions.projects.projects, { desc = '[F]ind [P]rojects'})
+vim.keymap.set('n', '<leader>fp', require('telescope').extensions.projects.projects, { desc = '[F]ind [P]rojects' })
 vim.keymap.set('n', '<leader>fh', require('telescope.builtin').help_tags, { desc = '[F]ind [H]elp' })
 
-vim.keymap.set('n', '<leader>fw', "<CMD>lua require('telescope.builtin').live_grep({debounce = 500})<CR>", { desc = '[F]ind [W]ord' })
+vim.keymap.set('n', '<leader>fw', "<CMD>lua require('telescope.builtin').live_grep({debounce = 500})<CR>",
+  { desc = '[F]ind [W]ord' })
 vim.keymap.set('n', '<leader>fd', require('telescope.builtin').diagnostics, { desc = '[F]ind [D]iagnostics' })
 vim.keymap.set('n', '<leader>fr', require('telescope.builtin').oldfiles, { desc = '[F]ind [R]ecent' })
 
@@ -645,20 +651,20 @@ local on_attach = function(client, bufnr)
     vim.lsp.buf.format()
   end, { desc = 'Format current buffer with LSP' })
   if client.server_capabilities.documentHighlightProvider then
-      vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
-      vim.api.nvim_clear_autocmds { buffer = bufnr, group = "lsp_document_highlight" }
-      vim.api.nvim_create_autocmd("CursorHold", {
-          callback = vim.lsp.buf.document_highlight,
-          buffer = bufnr,
-          group = "lsp_document_highlight",
-          desc = "Document Highlight",
-      })
-      vim.api.nvim_create_autocmd("CursorMoved", {
-          callback = vim.lsp.buf.clear_references,
-          buffer = bufnr,
-          group = "lsp_document_highlight",
-          desc = "Clear All the References",
-      })
+    vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
+    vim.api.nvim_clear_autocmds { buffer = bufnr, group = "lsp_document_highlight" }
+    vim.api.nvim_create_autocmd("CursorHold", {
+      callback = vim.lsp.buf.document_highlight,
+      buffer = bufnr,
+      group = "lsp_document_highlight",
+      desc = "Document Highlight",
+    })
+    vim.api.nvim_create_autocmd("CursorMoved", {
+      callback = vim.lsp.buf.clear_references,
+      buffer = bufnr,
+      group = "lsp_document_highlight",
+      desc = "Clear All the References",
+    })
   end
 end
 
@@ -708,10 +714,12 @@ local servers = {
   eslint = {},
   sqlls = {},
   volar = {},
+  yamlls = {},
+  jsonls = {},
   -- pyright = {},
   -- rust_analyzer = {},
   tsserver = {},
-  html = { filetypes = { 'html', 'twig', 'hbs'} },
+  html = { filetypes = { 'html', 'twig', 'hbs' } },
 
   lua_ls = {
     Lua = {
@@ -745,6 +753,41 @@ mason_lspconfig.setup_handlers {
     }
   end
 }
+
+-- Configure formatters
+require("conform").setup({
+  -- Map of filetype to formatters
+  formatters_by_ft = {
+    lua = { "stylua" },
+    -- Conform will run multiple formatters sequentially
+    go = { "goimports", "gofmt" },
+    -- Use a sub-list to run only the first available formatter
+    javascript = { { "prettierd", "prettier" } },
+    -- Use the "*" filetype to run formatters on all filetypes.
+    -- ["*"] = { "codespell" },
+    -- Use the "_" filetype to run formatters on filetypes that don't
+    -- have other formatters configured.
+    ["_"] = { "trim_whitespace" },
+  },
+  -- If this is set, Conform will run the formatter on save.
+  -- It will pass the table to conform.format().
+  -- This can also be a function that returns the table.
+  format_on_save = {
+    -- I recommend these options. See :help conform.format for details.
+    lsp_fallback = true,
+    timeout_ms = 500,
+  },
+  -- If this is set, Conform will run the formatter asynchronously after save.
+  -- It will pass the table to conform.format().
+  -- This can also be a function that returns the table.
+  -- format_after_save = {
+  --   lsp_fallback = true,
+  -- },
+  -- Set the log level. Use `:ConformInfo` to see the location of the log file.
+  log_level = vim.log.levels.ERROR,
+  -- Conform will notify you when a formatter errors
+  notify_on_error = true,
+})
 
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
