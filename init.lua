@@ -83,6 +83,47 @@ require('lazy').setup({
     'stevearc/conform.nvim',
     opts = {},
   },
+
+  -- Linting package
+  {
+    'mfussenegger/nvim-lint',
+    config = function()
+      local lint = require("lint")
+      lint.linters_by_ft = {
+        javascript = {
+          "eslint_d"
+        },
+        typescript = {
+          "eslint_d"
+        },
+        javascriptreact = {
+          "eslint_d"
+        },
+        typescriptreact = {
+          "eslint_d"
+        },
+        go = {
+          "golangcilint"
+        }
+      }
+    end,
+  },
+
+  {
+    "ray-x/go.nvim",
+    dependencies = { -- optional packages
+      "ray-x/guihua.lua",
+      "neovim/nvim-lspconfig",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    config = function()
+      require("go").setup()
+    end,
+    event = { "CmdlineEnter" },
+    ft = { "go", 'gomod' },
+    build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
+  },
+
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
   {
@@ -429,6 +470,16 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   pattern = '*',
 })
 
+-- [[ Lint after saving or stop typing ]]
+vim.api.nvim_create_autocmd({ "InsertLeave", "BufWritePost" }, {
+  callback = function()
+    local lint_status, lint = pcall(require, "lint")
+    if lint_status then
+      lint.try_lint()
+    end
+  end,
+})
+
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {
@@ -764,6 +815,7 @@ require("conform").setup({
     -- Use a sub-list to run only the first available formatter
     javascript = { "prettier" },
     typescript = { "prettier" },
+    -- yaml = { "prettier" },
     -- Use the "*" filetype to run formatters on all filetypes.
     -- ["*"] = { "codespell" },
     -- Use the "_" filetype to run formatters on filetypes that don't
