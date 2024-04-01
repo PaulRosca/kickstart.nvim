@@ -392,8 +392,16 @@ require('lazy').setup({
     dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" }
   },
   'f-person/git-blame.nvim',
+
+  -- Debug
   'mfussenegger/nvim-dap',
-  { "rcarriga/nvim-dap-ui", dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio", "theHamsta/nvim-dap-virtual-text" } }
+  { "rcarriga/nvim-dap-ui", dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio", "theHamsta/nvim-dap-virtual-text" } },
+
+  -- Folding
+  {
+    'kevinhwang91/nvim-ufo',
+    dependencies = { 'kevinhwang91/promise-async' }
+  }
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
@@ -415,6 +423,12 @@ require('lazy').setup({
 
 -- Make line numbers default
 vim.wo.number = true
+
+-- Folding options
+vim.o.foldcolumn = '1' -- '0' is not bad
+vim.o.foldlevel = 99   -- Using ufo provider need a large value, feel free to decrease the value
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
 
 vim.o.expandtab = true
 vim.o.smartindent = true
@@ -461,6 +475,10 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+
+-- Using ufo provider need remap `zR` and `zM`. If Neovim is 0.6.1, remap yourself
+vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
+vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -572,7 +590,7 @@ vim.keymap.set('n', '<leader>bd', ':b# | bd#<cr>', { desc = '[B]uffer [D]elete' 
 
 -- Debug keymaps
 vim.keymap.set('n', '<leader>ds', ':GoDebug<cr>', { desc = '[D]ebug [s]tart' })
-vim.keymap.set('n', '<leader>ds', ':GoDebug -s<cr>', { desc = '[D]ebug [S]top' })
+vim.keymap.set('n', '<leader>dS', ':GoDebug -s<cr>', { desc = '[D]ebug [S]top' })
 vim.keymap.set('n', '<leader>db', ':DapToggleBreakpoint<cr>', { desc = '[D]ebug [b]reakpoint' })
 
 -- Diagnostic keymaps
@@ -794,6 +812,12 @@ require('neodev').setup()
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+capabilities.textDocument.foldingRange = {
+  dynamicRegistration = false,
+  lineFoldingOnly = true
+}
+
+local language_servers = require("lspconfig").util.available_servers() -- or list servers manually like {'gopls', 'clangd'}
 
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
@@ -812,6 +836,14 @@ mason_lspconfig.setup_handlers {
     }
   end
 }
+
+for _, ls in ipairs(language_servers) do
+  require('lspconfig')[ls].setup({
+    capabilities = capabilities
+    -- you can add other fields for setting up lsp server in this table
+  })
+end
+require('ufo').setup()
 
 -- Configure formatters
 require("conform").setup({
