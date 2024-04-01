@@ -390,7 +390,10 @@ require('lazy').setup({
     -- Telescope file browser
     "nvim-telescope/telescope-file-browser.nvim",
     dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" }
-  }
+  },
+  'f-person/git-blame.nvim',
+  'mfussenegger/nvim-dap',
+  { "rcarriga/nvim-dap-ui", dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio", "theHamsta/nvim-dap-virtual-text" } }
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
@@ -567,6 +570,11 @@ vim.keymap.set('n', '<leader><tab>0', ':tablast<cr>')
 -- Buffer keymaps
 vim.keymap.set('n', '<leader>bd', ':b# | bd#<cr>', { desc = '[B]uffer [D]elete' })
 
+-- Debug keymaps
+vim.keymap.set('n', '<leader>ds', ':GoDebug<cr>', { desc = '[D]ebug [s]tart' })
+vim.keymap.set('n', '<leader>ds', ':GoDebug -s<cr>', { desc = '[D]ebug [S]top' })
+vim.keymap.set('n', '<leader>db', ':DapToggleBreakpoint<cr>', { desc = '[D]ebug [b]reakpoint' })
+
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>do', '<cmd>lua vim.diagnostic.open_float()<CR>', { desc = 'Diagnostic [O]pen' })
 vim.keymap.set('n', '<leader>dN', '<cmd>lua vim.diagnostic.goto_prev()<CR>', { desc = 'Diagnostic Previous' })
@@ -723,7 +731,7 @@ end
 require('which-key').register({
   ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
   ['<leader>b'] = { name = '[B]uffer', _ = 'which_key_ignore' },
-  ['<leader>d'] = { name = '[D]iagnostics', _ = 'which_key_ignore' },
+  ['<leader>d'] = { name = '[D]iagnostics/[D]ebug', _ = 'which_key_ignore' },
   ['<leader>o'] = { name = '[O]pen', _ = 'which_key_ignore' },
   ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
   ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
@@ -815,6 +823,8 @@ require("conform").setup({
     -- Use a sub-list to run only the first available formatter
     javascript = { "prettier" },
     typescript = { "prettier" },
+    jsonls = { "prettier" },
+    json = { "prettier" },
     -- yaml = { "prettier" },
     -- Use the "*" filetype to run formatters on all filetypes.
     -- ["*"] = { "codespell" },
@@ -825,11 +835,13 @@ require("conform").setup({
   -- If this is set, Conform will run the formatter on save.
   -- It will pass the table to conform.format().
   -- This can also be a function that returns the table.
-  format_on_save = {
-    -- I recommend these options. See :help conform.format for details.
-    lsp_fallback = true,
-    timeout_ms = 500,
-  },
+  format_on_save = function(bufnr)
+    -- Disable with a global or buffer-local variable
+    if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+      return
+    end
+    return { timeout_ms = 500, lsp_fallback = true }
+  end,
   -- If this is set, Conform will run the formatter asynchronously after save.
   -- It will pass the table to conform.format().
   -- This can also be a function that returns the table.
@@ -840,6 +852,24 @@ require("conform").setup({
   log_level = vim.log.levels.ERROR,
   -- Conform will notify you when a formatter errors
   notify_on_error = true,
+})
+
+vim.api.nvim_create_user_command("FormatDisable", function(args)
+  if args.bang then
+    -- FormatDisable! will disable formatting just for this buffer
+    vim.b.disable_autoformat = true
+  else
+    vim.g.disable_autoformat = true
+  end
+end, {
+  desc = "Disable autoformat-on-save",
+  bang = true,
+})
+vim.api.nvim_create_user_command("FormatEnable", function()
+  vim.b.disable_autoformat = false
+  vim.g.disable_autoformat = false
+end, {
+  desc = "Re-enable autoformat-on-save",
 })
 
 -- [[ Configure nvim-cmp ]]
