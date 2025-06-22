@@ -41,7 +41,7 @@ return {
     dependencies = { 'nvim-telescope/telescope.nvim', 'nvim-lua/plenary.nvim' },
     config = function()
       require('telescope').load_extension 'file_browser'
-      vim.keymap.set('n', '<leader>sb', ':Telescope file_browser<cr>', { desc = '[S]earch [B]rowser' })
+      vim.keymap.set('n', '<leader>sb', ':Telescope file_browser path=%:p:h select_buffer=true<cr>', { desc = '[S]earch [B]rowser' })
     end,
   },
   {
