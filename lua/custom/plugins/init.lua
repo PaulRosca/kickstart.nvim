@@ -26,14 +26,12 @@ return {
     end,
   },
   {
-    'nvim-telescope/telescope-project.nvim',
-    dependencies = {
-      'nvim-telescope/telescope.nvim',
-    },
+    'ahmedkhalf/project.nvim',
     config = function()
+      require('project_nvim').setup {}
       local ts = require 'telescope'
-      ts.load_extension 'project'
-      vim.keymap.set('n', '<leader>sp', ts.extensions.project.project, { desc = '[S]earch [P]projects' })
+      ts.load_extension 'projects'
+      vim.keymap.set('n', '<leader>sp', ts.extensions.projects.projects, { desc = '[S]earch [P]projects' })
     end,
   },
   {
