@@ -15,6 +15,7 @@ return {
       vim.keymap.set('n', '<leader>gs', ':G<cr>', { desc = '[G]it [S]tatus' })
     end,
   },
+  'f-person/git-blame.nvim',
   {
     'akinsho/toggleterm.nvim',
     version = '*',
