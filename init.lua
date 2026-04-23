@@ -313,6 +313,7 @@ require('lazy').setup({
         { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>ht', desc = 'Hot-reload Theme' },
       },
     },
   },
@@ -469,6 +470,9 @@ require('lazy').setup({
 
       -- Shortcut for searching your Neovim configuration files
       vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end, { desc = '[S]earch [N]eovim files' })
+
+      -- Load / hot-swap colorscheme
+      vim.keymap.set('n', '<leader>ht', '<cmd>Telescope colorscheme<cr>', { desc = '[H]ot-reload [T]heme' })
     end,
   },
 
@@ -806,31 +810,21 @@ require('lazy').setup({
       signature = { enabled = true },
 
       cmdline = {
-        keymap = { preset = 'inherit' },
-        completion = { menu = { auto_show = true } },
+        keymap = { preset = 'cmdline' },
+        completion = {
+          menu = { auto_show = true },
+          list = { selection = { preselect = false, auto_insert = false } },
+        },
       },
     },
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
+  {
+    'catppuccin/nvim',
+    name = 'catppuccin',
+    priority = 1000,
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
-        },
-      }
-
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'catppuccin'
     end,
   },
 
