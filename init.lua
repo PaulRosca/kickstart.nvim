@@ -596,12 +596,11 @@ require('lazy').setup({
         -- clangd = {},
         -- pyright = {},
         -- rust_analyzer = {},
-        --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        ts_ls = {},
+        eslint = {},
+        jsonls = {},
+        yamlls = {},
+        html = { filetypes = { 'html', 'twig', 'hbs' } },
         gopls = {
           settings = {
             gopls = {
@@ -623,14 +622,22 @@ require('lazy').setup({
       --    :Mason
       --
       -- You can press `g?` for help in this menu.
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
-        'lua-language-server', -- Lua Language server
-        'stylua', -- Used to format Lua code
+      -- Mason package names differ from lspconfig server names for some servers.
+      -- We list Mason package names explicitly here rather than using tbl_keys(servers).
+      local ensure_installed = {
+        'lua-language-server', -- lua_ls
+        'gopls', -- gopls
+        'typescript-language-server', -- ts_ls
+        'eslint-lsp', -- eslint
+        'json-lsp', -- jsonls
+        'yaml-language-server', -- yamlls
+        'html-lsp', -- html
+        'stylua', -- Lua formatter
         'goimports', -- Go import organizer
         'gofumpt', -- Stricter Go formatter
         'golangci-lint', -- Go linter
-      })
+        'prettier', -- JS/TS/JSON formatter
+      }
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -684,30 +691,28 @@ require('lazy').setup({
     opts = {
       notify_on_error = false,
       format_on_save = function(bufnr)
-        -- Disable "format_on_save lsp_fallback" for languages that don't
-        -- have a well standardized coding style. You can add additional
-        -- languages here or re-enable it for the disabled ones.
+        if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then return end
         local disable_filetypes = { c = true, cpp = true }
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          return nil
-        else
-          return {
-            timeout_ms = 500,
-            lsp_format = 'fallback',
-          }
-        end
+        if disable_filetypes[vim.bo[bufnr].filetype] then return nil end
+        return { timeout_ms = 500, lsp_format = 'fallback' }
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
         go = { 'goimports', 'gofumpt' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
-        -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        javascript = { 'prettier' },
+        typescript = { 'prettier' },
+        javascriptreact = { 'prettier' },
+        typescriptreact = { 'prettier' },
+        json = { 'prettier' },
+        ['_'] = { 'trim_whitespace' },
       },
     },
   },
+
+  -- Commands to toggle format-on-save per buffer or globally
+  -- :FormatDisable  -- disable globally
+  -- :FormatDisable! -- disable for current buffer only
+  -- :FormatEnable   -- re-enable
 
   { -- Autocompletion
     'saghen/blink.cmp',
@@ -729,12 +734,12 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
         opts = {},
       },
@@ -799,6 +804,11 @@ require('lazy').setup({
 
       -- Shows a signature help window while you type arguments for a function
       signature = { enabled = true },
+
+      cmdline = {
+        keymap = { preset = 'inherit' },
+        completion = { menu = { auto_show = true } },
+      },
     },
   },
 
@@ -845,19 +855,6 @@ require('lazy').setup({
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
 
-      -- Simple and easy statusline.
-      --  You could remove this setup call if you don't like it,
-      --  and try some other statusline plugin
-      local statusline = require 'mini.statusline'
-      -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
-
-      -- You can configure sections in the statusline by overriding their
-      -- default behavior. For example, here we set the section for
-      -- cursor location to LINE:COLUMN
-      ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function() return '%2l:%-2v' end
-
       -- ... and there is more!
       --  Check out: https://github.com/nvim-mini/mini.nvim
     end,
@@ -868,7 +865,7 @@ require('lazy').setup({
     branch = 'main',
     build = ':TSUpdate',
     config = function()
-      local filetypes = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'go', 'gomod', 'gosum', 'gowork' }
+      local filetypes = { 'bash', 'c', 'cpp', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'go', 'gomod', 'gosum', 'gowork', 'javascript', 'typescript', 'tsx', 'json', 'yaml', 'css', 'scss', 'sql', 'python', 'rust' }
       require('nvim-treesitter').install(filetypes)
       vim.api.nvim_create_autocmd('FileType', {
         pattern = filetypes,
@@ -886,7 +883,7 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.debug',
   require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
@@ -924,6 +921,37 @@ require('lazy').setup({
     },
   },
 })
+
+-- Toggle format-on-save. Use :FormatDisable! to disable for current buffer only.
+vim.api.nvim_create_user_command('FormatDisable', function(args)
+  if args.bang then
+    vim.b.disable_autoformat = true
+  else
+    vim.g.disable_autoformat = true
+  end
+end, { bang = true, desc = 'Disable autoformat-on-save' })
+vim.api.nvim_create_user_command('FormatEnable', function()
+  vim.b.disable_autoformat = false
+  vim.g.disable_autoformat = false
+end, { desc = 'Re-enable autoformat-on-save' })
+
+-- Wrapped line navigation: j/k move by visual line when no count is given
+vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+
+-- Treesitter-based folding
+vim.o.foldmethod = 'expr'
+vim.o.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+vim.o.foldtext = ''
+vim.o.foldcolumn = '1'
+vim.o.foldlevel = 99
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
+
+-- Editor defaults
+vim.o.expandtab = true
+vim.o.smartindent = true
+vim.o.title = true
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
