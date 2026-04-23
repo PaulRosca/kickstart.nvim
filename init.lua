@@ -594,7 +594,6 @@ require('lazy').setup({
       --  See `:help lsp-config` for information about keys and how to configure
       local servers = {
         -- clangd = {},
-        -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
         --
@@ -603,6 +602,18 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
+        gopls = {
+          settings = {
+            gopls = {
+              gofumpt = true,
+              analyses = {
+                unusedparams = true,
+                nilness = true,
+              },
+              staticcheck = true,
+            },
+          },
+        },
       }
 
       -- Ensure the servers and tools above are installed
@@ -616,7 +627,9 @@ require('lazy').setup({
       vim.list_extend(ensure_installed, {
         'lua-language-server', -- Lua Language server
         'stylua', -- Used to format Lua code
-        -- You can add other tools here that you want Mason to install
+        'goimports', -- Go import organizer
+        'gofumpt', -- Stricter Go formatter
+        'golangci-lint', -- Go linter
       })
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -686,6 +699,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        go = { 'goimports', 'gofumpt' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -851,8 +865,10 @@ require('lazy').setup({
 
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
+    build = ':TSUpdate',
     config = function()
-      local filetypes = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+      local filetypes = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'go', 'gomod', 'gosum', 'gowork' }
       require('nvim-treesitter').install(filetypes)
       vim.api.nvim_create_autocmd('FileType', {
         pattern = filetypes,
@@ -872,7 +888,7 @@ require('lazy').setup({
   --
   -- require 'kickstart.plugins.debug',
   require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
